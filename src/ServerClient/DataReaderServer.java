@@ -15,6 +15,7 @@ public class DataReaderServer implements Server {
     volatile boolean stop;
 	Thread serverThread;
 	Filenames names;
+    static Object lock = new Object();
     
 	public DataReaderServer( ConcurrentHashMap<String,Double> simulatorVars,Filenames names) {
 		this.simulatorVars = simulatorVars;
@@ -29,38 +30,55 @@ public class DataReaderServer implements Server {
 				
 				@Override
 				public void run() {
-					
 					try {
-						ServerSocket server = new ServerSocket(port);
-						System.out.println("opened server");
+						ServerSocket myserver = new ServerSocket(port);
+						myserver.setSoTimeout(1000);
+						
 						String[] name = names.getString();
+						
 						while(!stop)
 						{
-							Socket client = server.accept();
-							System.out.println("client connected to server");
-							BufferedReader reader = new BufferedReader(new InputStreamReader(client.getInputStream()));
-							String line;
-							while((line= reader.readLine()) != null) {
-								System.out.println("Received from simulator: " + line);
-								String[] values = line.split(",");
-								for(int index = 0;index<name.length;index++) {
-									simulatorVars.put(name[index],Double.parseDouble(values[index]));
-								}
+							try {
+								Socket simulatorclient = myserver.accept();
+								//System.out.println("connected to the simulator");
+							  synchronized (this) { this.notifyAll(); }
+							 
+								System.out.println("simulator connected to myserver");
 								
-							}
-							client.getInputStream().close();
-							client.close();
-						}
-						server.close();
+								BufferedReader reader = new BufferedReader(new InputStreamReader(simulatorclient.getInputStream()));
+								String line;
+								while((line= reader.readLine()) != null) {
+									System.out.println("Received from simulator: " + line);
+									String[] values = line.split(",");
+									for(int index = 0;index<name.length;index++) {
+										simulatorVars.put(name[index],Double.parseDouble(values[index]));
+									}
+									
+								}
+								simulatorclient.getInputStream().close();
+								simulatorclient.close();
+							} catch(Exception e) {} // If server.accept didn't work, we'll try again
+						} // end of loop
+						
+						myserver.close();
 						
 					} catch (IOException e) {
+						System.out.println("Couldn't open the server ( erorr in class ServerSocket())");
 						//e.printStackTrace();
 					}
 			
 				}
 			
 			});
-				serverThread.start();
+			serverThread.start();
+			
+			synchronized (this) {
+				try {
+					System.out.println("waiting for the simulator to connect");
+					this.wait();
+				} catch (InterruptedException e) {
+				}
+			}
 		}
 
 		@Override
@@ -73,6 +91,7 @@ public class DataReaderServer implements Server {
 		public Thread getThread() {
 			return serverThread;
 		}
+		
 	}
 	
 
