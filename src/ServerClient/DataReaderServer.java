@@ -54,7 +54,7 @@ public class DataReaderServer implements Server {
 						server.close();
 						
 					} catch (IOException e) {
-						e.printStackTrace();
+						//e.printStackTrace();
 					}
 			
 				}
