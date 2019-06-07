@@ -15,39 +15,53 @@ public class ShuntingYard {
 		Stack<String> stack = new Stack<String>();
 		Stack<Expression> stackExp = new Stack<Expression>();
 		
-		//String[] split = exp.split(("((?<=[><()])|(?=[><()]))|((?<=&&)|(?=&&))|((?<===)|(?===))|((?<=!=)|(?=!=))|(((?<=\\|\\|)|(?=\\|\\|)))"));
-		String[] split = exp.split("(?<=[-+*/()])|(?=[-+*/()])|\" \"");
+		if(exp.startsWith("-"))
+			exp = "0" + exp;
+		String lastToken = "";
+		String[] split = exp.split("(?<=[-+*/()])|(?=[-+*/()])");
 		for (String s : split){  //(ho – heading)/ 20
 			if(s.isEmpty())
 				continue;
 			
 			s = s.trim();
 			
-			if (isDouble(s) || s.matches("\\w+")){
+			if (isDouble(s)){
 				queue.add(s);
+				lastToken=s;
+				continue;
 			}
-			else{
-				switch(s) {
-			    case "/":
-			    case "*":
-			    case "(":
-			        stack.push(s);
-			        break;
-			    case "+":
-			    case "-":
-			    	while (!stack.empty() && (!stack.peek().equals("("))){
-			    		queue.add(stack.pop());
-			    	}
-			        stack.push(s);
-			        break;
-			    case ")":
-			    	while (!stack.peek().equals("(")){
-			    		queue.add(stack.pop());
-			    	}
-			    	stack.pop();
-			        break;
+			if(s.matches("^[a-zA-Z0-9_]+$"))
+					queue.add(s);
+
+			switch(s) {
+		    case "/":
+		    case "*":
+		    case "(":
+		        stack.push(s);
+		        break;
+		    case "+":
+		    case "-":
+				if(s.equals("-") && lastToken.matches("^[[\\/\\*\\+\\-\\(]]$"))
+				{
+					stack.push("~");
+					break;
 				}
+				
+				while (!stack.empty() && (!stack.peek().equals("("))){
+					queue.add(stack.pop());
+				}
+
+		        stack.push(s);
+		        break;
+		        
+		    case ")":
+		    	while (!stack.peek().equals("(")){
+		    		queue.add(stack.pop());
+		    	}
+		    	stack.pop();
+		        break;
 			}
+			lastToken = s;
 		}
 		while(!stack.isEmpty()){
 			queue.add(stack.pop());
@@ -57,13 +71,16 @@ public class ShuntingYard {
 			if (isDouble(str)){
 				stackExp.push(new Number(Double.parseDouble(str)));
 			}
-			else if (str.matches("\\w+")){
+			else if (str.matches("^[a-zA-Z0-9_]+$")){
 				stackExp.push(new VarNumber(str,ch));
 			}
 			else{
 				Expression right = stackExp.pop();
-				Expression left = stackExp.pop();
+				Expression left = null;
 				
+				if(str.charAt(0) != '~') 
+					left = stackExp.pop();
+		
 				switch(str) {
 			    case "/":
 			    	stackExp.push(new Div(left, right));
@@ -77,6 +94,9 @@ public class ShuntingYard {
 			    case "-":
 			    	stackExp.push(new Minus(left, right));
 			        break;
+			    case "~":
+			    	stackExp.push(new Mul(new Number(-1), right));
+			    	break;
 				}
 			}
 		}

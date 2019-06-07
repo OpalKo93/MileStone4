@@ -34,7 +34,6 @@ public class DataReaderServer implements Server {
 						ServerSocket myserver = new ServerSocket(port);
 						myserver.setSoTimeout(1000);
 						
-						String[] name = names.getString();
 						
 						while(!stop)
 						{
@@ -48,7 +47,7 @@ public class DataReaderServer implements Server {
 								BufferedReader reader = new BufferedReader(new InputStreamReader(simulatorclient.getInputStream()));
 								String line;
 								while((line= reader.readLine()) != null) {
-									System.out.println("Received from simulator: " + line);
+									//System.out.println("Received from simulator: " + line);
 									String[] values = line.split(",");
 									for(int index = 0;index<name.length;index++) {
 										simulatorVars.put(name[index],Double.parseDouble(values[index]));
