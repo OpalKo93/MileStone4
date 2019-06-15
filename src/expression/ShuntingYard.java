@@ -14,25 +14,27 @@ public class ShuntingYard {
 		Queue<String> queue = new LinkedList<String>();
 		Stack<String> stack = new Stack<String>();
 		Stack<Expression> stackExp = new Stack<Expression>();
+		String lasttoken = "";
 		
 		if(exp.startsWith("-"))
 			exp = "0" + exp;
-		String lastToken = "";
+		//String[] split = exp.split(("((?<=[><()])|(?=[><()]))|((?<=&&)|(?=&&))|((?<===)|(?===))|((?<=!=)|(?=!=))|(((?<=\\|\\|)|(?=\\|\\|)))"));
 		String[] split = exp.split("(?<=[-+*/()])|(?=[-+*/()])");
-		for (String s : split){  //(ho – heading)/ 20
+		for (String s : split){
+			s = s.trim();
 			if(s.isEmpty())
 				continue;
-			
-			s = s.trim();
-			
-			if (isDouble(s)){
+
+			if (isDouble(s)) {
 				queue.add(s);
-				lastToken=s;
+				lasttoken = s;
 				continue;
 			}
-			if(s.matches("^[a-zA-Z0-9_]+$"))
-					queue.add(s);
-
+			
+			if(s.matches("^[a-zA-Z0-9_]+$")) {
+				queue.add(s);	
+			}
+			
 			switch(s) {
 		    case "/":
 		    case "*":
@@ -41,19 +43,16 @@ public class ShuntingYard {
 		        break;
 		    case "+":
 		    case "-":
-				if(s.equals("-") && lastToken.matches("^[[\\/\\*\\+\\-\\(]]$"))
+		    	if(s.equals("-") && lasttoken.matches("^[[\\/\\*\\+\\-\\(]]$"))
 				{
 					stack.push("~");
 					break;
 				}
-				
-				while (!stack.empty() && (!stack.peek().equals("("))){
-					queue.add(stack.pop());
-				}
-
+		    	while (!stack.empty() && (!stack.peek().equals("("))) {
+		    		queue.add(stack.pop());
+		    	}
 		        stack.push(s);
 		        break;
-		        
 		    case ")":
 		    	while (!stack.peek().equals("(")){
 		    		queue.add(stack.pop());
@@ -61,8 +60,9 @@ public class ShuntingYard {
 		    	stack.pop();
 		        break;
 			}
-			lastToken = s;
-		}
+			lasttoken = s;
+		} //end of loop
+		
 		while(!stack.isEmpty()){
 			queue.add(stack.pop());
 		}
@@ -78,9 +78,10 @@ public class ShuntingYard {
 				Expression right = stackExp.pop();
 				Expression left = null;
 				
-				if(str.charAt(0) != '~') 
+				if(str.charAt(0) != '~') {  
 					left = stackExp.pop();
-		
+				}
+			
 				switch(str) {
 			    case "/":
 			    	stackExp.push(new Div(left, right));
@@ -115,4 +116,5 @@ public class ShuntingYard {
 	
 		
 	}
+
 

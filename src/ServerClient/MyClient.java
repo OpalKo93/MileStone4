@@ -16,7 +16,7 @@ public class MyClient implements Client {
 		
 		try {
 			socket = new Socket(ip,port);
-			System.out.println("connected to the flight simulator!");
+			//System.out.println("connected to the flight simulator!");
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -30,7 +30,7 @@ public class MyClient implements Client {
 		try {
 			PrintWriter OutToFlightGear = new PrintWriter(socket.getOutputStream());
 			OutToFlightGear.println("set " + path +" " + value);
-			System.out.println("sending to simulator : "+ "set " + path +" " + value);
+			//System.out.println("sending to simulator : "+ "set " + path +" " + value);
 			OutToFlightGear.flush();
 			
 		} catch (IOException e) {

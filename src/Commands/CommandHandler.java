@@ -43,6 +43,7 @@ public class CommandHandler {
          commandHashMap.put("disconnect", new DisconnectCommand(client));
          commandHashMap.put("return", new ReturnCommand(client,this));
          commandHashMap.put("assignment", new AssignmentCommand(this,client));
+         commandHashMap.put("sleep", new SleepCommand());
 	}
 	
 	void setServer(DataReaderServer server)

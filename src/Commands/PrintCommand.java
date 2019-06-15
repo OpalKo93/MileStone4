@@ -15,7 +15,7 @@ public class PrintCommand implements Command {  //gets data from datareaderserve
 	@Override
 	public void doCommand(String[] s, HashMap<String, Double> symbolTable) {
 		//print "done"
-		if(!ch.symbltablBind.containsKey(s[1]))
+		if(!ch.symbltablBind.containsKey(s[1].trim()))
 			System.out.println(s[1].trim());
 		else
 			System.out.println(ch.simulatorVars.get(ch.symbltablBind.get(s[1].trim())));

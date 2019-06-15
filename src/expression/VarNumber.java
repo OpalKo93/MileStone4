@@ -21,9 +21,10 @@ public class VarNumber implements Expression {
 
 	@Override
 	public double calculate() {
-		if((ch.symbltablBind.containsKey(variable))){
-		return ch.simulatorVars.get((ch.symbltablBind.get(variable)));
-	}
+		if((ch.symbltablBind.containsKey(variable))) {
+			return ch.simulatorVars.get(ch.symbltablBind.get(variable));
+		}
 		return ch.symbolTable.get(variable);
 }
+	
 }

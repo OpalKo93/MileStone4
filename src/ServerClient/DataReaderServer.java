@@ -40,7 +40,7 @@ public class DataReaderServer implements Server {
 							try {
 								Socket simulatorclient = myserver.accept();
 								//System.out.println("connected to the simulator");
-							  synchronized (this) { this.notifyAll(); }
+							  synchronized (lock) { lock.notifyAll(); }
 							 
 								System.out.println("simulator connected to myserver");
 								
@@ -51,8 +51,9 @@ public class DataReaderServer implements Server {
 									String[] values = line.split(",");
 									for(int index = 0;index<name.length;index++) {
 										simulatorVars.put(name[index],Double.parseDouble(values[index]));
+							
 									}
-									
+									Thread.sleep(100);
 								}
 								simulatorclient.getInputStream().close();
 								simulatorclient.close();
@@ -71,10 +72,10 @@ public class DataReaderServer implements Server {
 			});
 			serverThread.start();
 			
-			synchronized (this) {
+			synchronized (lock) {
 				try {
 					System.out.println("waiting for the simulator to connect");
-					this.wait();
+					lock.wait();
 				} catch (InterruptedException e) {
 				}
 			}
